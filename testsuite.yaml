@@ -1,0 +1,39 @@
+name: IntegrityTest
+version: "2"
+
+vars:
+  url: https://dog.ceo/api
+
+testcases:
+
+- name: GetDogs
+  steps:
+  - type: http
+    method: GET
+    headers:
+        Accept: application/json
+        Content-Type: application/json
+    url: "{{.url}}/breeds/list/all"
+    retry: 1
+    delay: 2
+    assertions:
+    - result.statuscode ShouldEqual 200
+    - result.bodyjson ShouldContainKey message
+    - result.bodyjson.message.bulldog.bulldog0 ShouldEqual "boston"
+
+- name: GetDogName
+  steps:
+  - script: echo 'bulldog'
+    assertions:
+    - result.code ShouldEqual 0
+    
+
+- name: GetBostonBulldog
+  steps:
+  - type: http
+    method: GET
+    url: "https://dog.ceo/api/breed/bulldog/{{.GetDogs.result.bodyjson.message.bulldog.bulldog0}}/images"
+    retry: 1
+    delay: 2
+    assertions:
+    - result.statuscode ShouldEqual 200
